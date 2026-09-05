@@ -36,6 +36,6 @@ Then Custom domains → add `anjunlei.com` (and `www.anjunlei.com`). If the doma
 **Option B — direct upload from this machine**
 
 ```bash
-npx wrangler login      # one-time, opens the browser
-pnpm deploy
+npx wrangler login      # one-time, opens the browser; pick the anjunlei20060606 account
+pnpm deploy             # builds and uploads dist/ → https://andrew-an-site.pages.dev
 ```
