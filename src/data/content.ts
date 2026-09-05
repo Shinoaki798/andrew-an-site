@@ -8,7 +8,7 @@ export const profile = {
   email: 'klein.an@mail.utoronto.ca',
   github: 'https://github.com/Shinoaki798',
   linkedin: 'https://www.linkedin.com/in/andrew-an-b8a937259/',
-  resume: '/Andrew_An_Resume.pdf',
+  resume: '/Junlei_An_Resume.pdf',
   school: 'University of Toronto',
   degree: 'BASc Computer Engineering · 2024–2029',
   tagline: ['I build strategy engines,', 'bare-metal games, and the', 'interfaces that make them legible.'],

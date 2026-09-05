@@ -17,7 +17,7 @@ pnpm preview
 
 Everything textual lives in one file: `src/data/content.ts` (profile, projects, toolkit, experience).
 Project diagrams are hand-drawn SVGs in `src/components/Diagrams.tsx`.
-Replace `public/Andrew_An_Resume.pdf` to update the downloadable résumé.
+Replace `public/Junlei_An_Resume.pdf` to update the downloadable résumé.
 
 ## Deploy
 
