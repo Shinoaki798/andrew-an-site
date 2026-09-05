@@ -18,7 +18,8 @@ export function Hero() {
   }, [])
 
   const accent = dark ? '#f2b23a' : '#c9761a'
-  const dim = dark ? '#6c8a92' : '#7b8790'
+  const dim = dark ? '#6c8a92' : '#5c6a72'
+  const bg = dark ? '#0a0e12' : '#f3f0e8'
 
   return (
     <section id="top" className="relative min-h-[100svh] pt-16">
@@ -63,7 +64,7 @@ export function Hero() {
           <div className="relative aspect-square w-full max-w-[560px] md:ml-auto rounded-3xl border hairline bg-ink-2/60 overflow-hidden">
             <div className="absolute inset-0">
               <Suspense fallback={null}>
-                <Globe paused={!motion} accent={accent} dim={dim} />
+                <Globe paused={!motion} accent={accent} dim={dim} bg={bg} />
               </Suspense>
             </div>
             <div className="pointer-events-none absolute inset-0 p-4 font-mono text-[0.62rem] tracking-[0.16em] uppercase text-mute">

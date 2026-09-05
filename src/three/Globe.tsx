@@ -2,7 +2,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
-type Props = { paused: boolean; accent: string; dim: string }
+type Props = { paused: boolean; accent: string; dim: string; bg: string }
 
 const R = 1
 
@@ -30,7 +30,7 @@ const LINKS: [number, number][] = [
   [0, 1], [0, 2], [0, 5], [1, 3], [2, 6], [2, 7], [3, 4], [1, 4],
 ]
 
-function Lattice({ accent, dim }: { accent: string; dim: string }) {
+function Lattice({ accent, dim, bg }: { accent: string; dim: string; bg: string }) {
   const points = useMemo(() => {
     const n = 1400
     const arr = new Float32Array(n * 3)
@@ -78,7 +78,7 @@ function Lattice({ accent, dim }: { accent: string; dim: string }) {
       </points>
       <mesh>
         <sphereGeometry args={[R * 0.985, 48, 48]} />
-        <meshBasicMaterial color="#000" transparent opacity={0.55} />
+        <meshBasicMaterial color={bg} transparent opacity={0.7} />
       </mesh>
       {rings.map((pts, i) => (
         <Line key={i} points={pts} color={dim} opacity={0.35} />
@@ -103,7 +103,7 @@ function Line({ points, color, opacity }: { points: THREE.Vector3[]; color: stri
   )
 }
 
-function Scene({ paused, accent, dim }: Props) {
+function Scene({ paused, accent, dim, bg }: Props) {
   const g = useRef<THREE.Group>(null)
   const target = useRef({ x: 0, y: 0 })
   useFrame((state, dt) => {
@@ -117,7 +117,7 @@ function Scene({ paused, accent, dim }: Props) {
   })
   return (
     <group ref={g} rotation={[0.35, 0.8, 0]}>
-      <Lattice accent={accent} dim={dim} />
+      <Lattice accent={accent} dim={dim} bg={bg} />
     </group>
   )
 }
@@ -126,7 +126,7 @@ export default function Globe(props: Props) {
   return (
     <Canvas
       dpr={[1, 1.75]}
-      camera={{ position: [0, 0, 3.15], fov: 40 }}
+      camera={{ position: [0, 0, 3.7], fov: 38 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       frameloop={props.paused ? 'demand' : 'always'}
       style={{ position: 'absolute', inset: 0 }}
