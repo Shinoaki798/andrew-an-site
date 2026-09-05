@@ -4,7 +4,9 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url)
     const wantsApex = url.hostname === `www.${APEX}`
-    if (url.protocol === 'http:' || wantsApex) {
+    // Cloudflare normalises request.url to https; the client's real scheme is in cf-visitor.
+    const insecure = url.protocol === 'http:' || (request.headers.get('cf-visitor') || '').includes('"http"')
+    if (insecure || wantsApex) {
       url.protocol = 'https:'
       if (wantsApex) url.hostname = APEX
       return Response.redirect(url.toString(), 301)
