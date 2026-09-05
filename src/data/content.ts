@@ -1,7 +1,7 @@
 export const profile = {
-  name: 'Andrew An',
+  name: 'Junlei An',
   legalName: 'Junlei An',
-  handle: 'aa.',
+  handle: 'ja.',
   role: 'Computer Engineer & Systems Builder',
   location: 'Oakville · Toronto, Canada',
   coords: '43.45° N · 79.68° W',

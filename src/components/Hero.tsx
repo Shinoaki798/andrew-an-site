@@ -33,7 +33,7 @@ export function Hero() {
             </m.p>
             <p className="label mb-2 text-amber">Hello, I’m</p>
             <h1 className="display text-[clamp(4.6rem,15vw,12.5rem)] font-semibold">
-              {['Andrew', 'An.'].map((w, i) => (
+              {['Junlei', 'An.'].map((w, i) => (
                 <span key={w} className="reveal-line">
                   <m.span className="block" initial={anim ? { y: '110%' } : false} animate={{ y: 0 }} transition={{ duration: 0.9, ease, delay: 0.1 + i * 0.12 }}>
                     {w}
@@ -84,7 +84,7 @@ export function Hero() {
 
       <div className="mx-auto mt-14 max-w-7xl px-5 md:px-8">
         <div className="flex items-center justify-between border-t hairline pt-4 label">
-          <span>{profile.legalName} · {profile.school}</span>
+          <span>{profile.name} · {profile.school}</span>
           <span className="hidden sm:inline">Scroll <span className="blink">▾</span></span>
         </div>
       </div>

@@ -1,6 +1,6 @@
 # andrew-an-site
 
-Personal website for Andrew (Junlei) An — https://github.com/Shinoaki798
+Personal website for Junlei An — https://github.com/Shinoaki798
 
 **Stack**: Vite 8 · React 19 · TypeScript · Tailwind CSS v4 · Motion · React Three Fiber (Three.js) · Lenis
 

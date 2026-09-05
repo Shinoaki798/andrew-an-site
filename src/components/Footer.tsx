@@ -15,7 +15,7 @@ export function Footer() {
             {[
               ['Email', `mailto:${profile.email}`, profile.email],
               ['GitHub', profile.github, 'Shinoaki798'],
-              ['LinkedIn', profile.linkedin, 'andrew-an'],
+              ['LinkedIn', profile.linkedin, 'View profile'],
             ].map(([k, h, v]) => (
               <a key={k} href={h} target={h.startsWith('http') ? '_blank' : undefined} rel="noreferrer" className="group inline-flex items-center gap-2 font-mono text-sm hover:text-amber transition-colors focus-ring">
                 <span className="label">{k}</span> {v} <Arrow className="text-mute group-hover:text-amber" />
@@ -24,7 +24,7 @@ export function Footer() {
           </div>
         </Reveal>
         <div className="mt-20 flex flex-wrap items-center justify-between gap-3 border-t hairline pt-6 label">
-          <span>© 2026 {profile.legalName}. Built with React 19, Vite and a hand-rolled contour algorithm.</span>
+          <span>© 2026 {profile.name}. Built with React 19, Vite and a hand-rolled contour algorithm.</span>
           <span>{profile.coords}</span>
         </div>
       </div>

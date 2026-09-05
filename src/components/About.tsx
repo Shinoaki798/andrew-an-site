@@ -10,7 +10,7 @@ export function About() {
         <div className="mt-14 grid gap-4 md:grid-cols-12">
           <Reveal className="md:col-span-7 rounded-2xl border hairline bg-ink p-7 md:p-9">
             <p className="text-lg leading-relaxed text-bone-2">
-              I’m Andrew, also Junlei. Competition math and programming got me started; a Reversi bot that placed 3rd against 400 classmates convinced me that careful search beats clever guesses.
+              I’m Junlei An. Competition math and programming got me started; a Reversi bot that placed 3rd against 400 classmates convinced me that careful search beats clever guesses.
             </p>
             <p className="mt-5 text-lg leading-relaxed text-bone-2">
               Since then I’ve written a 4X game in assembly for an FPGA board, led a team through a real-world map application, and spent this summer building Hegemony 2060: a strategy game whose engine is deterministic enough to replay any match from a seed, and whose hardest rule is that hidden information must never reach the client.
