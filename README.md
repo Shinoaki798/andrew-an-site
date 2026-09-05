@@ -21,5 +21,5 @@ Replace `public/Junlei_An_Resume.pdf` to update the downloadable résumé.
 
 ## Deploy
 
-- **GitHub Pages**: push to `main`; `.github/workflows/deploy.yml` builds and publishes. Enable Pages → Source: GitHub Actions in the repo settings. For a custom domain, add a `public/CNAME` file.
+- **GitHub Pages**: push to `main`; `.github/workflows/deploy.yml` builds and publishes. Enable Pages → Source: GitHub Actions in the repo settings. Custom domain: `public/CNAME` = `anjunlei.com`; DNS needs A records to 185.199.108–111.153 and `www` CNAME → `shinoaki798.github.io`.
 - **Vercel / Cloudflare Pages / Netlify**: import the repo, framework "Vite", build `pnpm build`, output `dist`.
