@@ -19,23 +19,11 @@ Everything textual lives in one file: `src/data/content.ts` (profile, projects, 
 Project diagrams are hand-drawn SVGs in `src/components/Diagrams.tsx`.
 Replace `public/Junlei_An_Resume.pdf` to update the downloadable résumé.
 
-## Deploy (Cloudflare Pages)
-
-**Option A — Git integration (recommended, auto-deploys on push)**
-Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git → pick `Shinoaki798/andrew-an-site`:
-
-| Setting | Value |
-|---|---|
-| Framework preset | Vite |
-| Build command | `pnpm build` |
-| Build output directory | `dist` |
-| Environment variable | `NODE_VERSION` = `22` |
-
-Then Custom domains → add `anjunlei.com` (and `www.anjunlei.com`). If the domain is on Cloudflare, DNS is created automatically.
-
-**Option B — direct upload from this machine**
+## Deploy (Cloudflare Workers static assets → anjunlei.com)
 
 ```bash
-npx wrangler login      # one-time, opens the browser; pick the anjunlei20060606 account
-pnpm deploy             # builds and uploads dist/ → https://andrew-an-site.pages.dev
+npx wrangler login   # one-time; pick the anjunlei20060606 account
+pnpm deploy          # builds dist/ and runs `wrangler deploy`
 ```
+
+`wrangler.toml` declares `anjunlei.com` and `www.anjunlei.com` as custom domains, so DNS and TLS are managed by Cloudflare automatically. `worker/index.js` only redirects `www` → apex and serves the assets. Preview URL: https://anjunlei-site.andrew-an-site.workers.dev

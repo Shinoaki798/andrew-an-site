@@ -1,6 +1,16 @@
-# Cloudflare Pages — used by `pnpm deploy` (direct upload). The Git-connected
-# project in the dashboard ignores this file and uses its own build settings.
-name = "andrew-an-site"
-account_id = "d642a587d926b6bfcb1159df684b7554"  # anjunlei20060606@gmail.com account (not a secret)
-pages_build_output_dir = "dist"
+# Cloudflare Workers (static assets) — deployed with `pnpm deploy`.
+name = "anjunlei-site"
+main = "worker/index.js"
 compatibility_date = "2026-09-01"
+account_id = "d642a587d926b6bfcb1159df684b7554"  # anjunlei20060606@gmail.com account (not a secret)
+workers_dev = true
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "none"
+
+routes = [
+  { pattern = "anjunlei.com", custom_domain = true },
+  { pattern = "www.anjunlei.com", custom_domain = true },
+]
