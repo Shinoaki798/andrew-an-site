@@ -19,7 +19,23 @@ Everything textual lives in one file: `src/data/content.ts` (profile, projects, 
 Project diagrams are hand-drawn SVGs in `src/components/Diagrams.tsx`.
 Replace `public/Junlei_An_Resume.pdf` to update the downloadable résumé.
 
-## Deploy
+## Deploy (Cloudflare Pages)
 
-- **GitHub Pages**: push to `main`; `.github/workflows/deploy.yml` builds and publishes. Enable Pages → Source: GitHub Actions in the repo settings. Custom domain: `public/CNAME` = `anjunlei.com`; DNS needs A records to 185.199.108–111.153 and `www` CNAME → `shinoaki798.github.io`.
-- **Vercel / Cloudflare Pages / Netlify**: import the repo, framework "Vite", build `pnpm build`, output `dist`.
+**Option A — Git integration (recommended, auto-deploys on push)**
+Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git → pick `Shinoaki798/andrew-an-site`:
+
+| Setting | Value |
+|---|---|
+| Framework preset | Vite |
+| Build command | `pnpm build` |
+| Build output directory | `dist` |
+| Environment variable | `NODE_VERSION` = `22` |
+
+Then Custom domains → add `anjunlei.com` (and `www.anjunlei.com`). If the domain is on Cloudflare, DNS is created automatically.
+
+**Option B — direct upload from this machine**
+
+```bash
+npx wrangler login      # one-time, opens the browser
+pnpm deploy
+```
