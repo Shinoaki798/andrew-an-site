@@ -5,12 +5,13 @@ compatibility_date = "2026-09-01"
 account_id = "d642a587d926b6bfcb1159df684b7554"  # anjunlei20060606@gmail.com account (not a secret)
 workers_dev = true
 
-[assets]
-directory = "./dist"
-binding = "ASSETS"
-not_found_handling = "none"
-
+# NOTE: keep `routes` above any [table] — TOML would otherwise nest it under that table.
 routes = [
   { pattern = "anjunlei.com", custom_domain = true },
   { pattern = "www.anjunlei.com", custom_domain = true },
 ]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "none"
