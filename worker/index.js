@@ -1,9 +1,12 @@
-// Tiny edge script: www → apex redirect, everything else served from the static assets.
+// Edge script in front of the static assets: force https, www → apex, then serve.
+const APEX = 'anjunlei.com'
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
-    if (url.hostname.startsWith('www.')) {
-      url.hostname = url.hostname.slice(4)
+    const wantsApex = url.hostname === `www.${APEX}`
+    if (url.protocol === 'http:' || wantsApex) {
+      url.protocol = 'https:'
+      if (wantsApex) url.hostname = APEX
       return Response.redirect(url.toString(), 301)
     }
     return env.ASSETS.fetch(request)
