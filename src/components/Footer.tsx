@@ -24,7 +24,7 @@ export function Footer() {
           </div>
         </Reveal>
         <div className="mt-20 flex flex-wrap items-center justify-between gap-3 border-t hairline pt-6 label">
-          <span>© 2026 {profile.legalName}. Built with React 19, Three.js and Vite.</span>
+          <span>© 2026 {profile.legalName}. Built with React 19, Vite and a hand-rolled contour algorithm.</span>
           <span>{profile.coords}</span>
         </div>
       </div>

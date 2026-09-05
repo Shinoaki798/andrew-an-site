@@ -1,10 +1,10 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion as m } from 'motion/react'
 import { profile } from '../data/content'
 import { usePrefs } from './Providers'
 import { Arrow, useAnim } from './Shared'
 
-const Globe = lazy(() => import('../three/Globe'))
+import Terrain from './Terrain'
 
 const ease = [0.2, 0.7, 0.2, 1] as const
 
@@ -17,9 +17,9 @@ export function Hero() {
     f(); const id = setInterval(f, 1000); return () => clearInterval(id)
   }, [])
 
-  const accent = dark ? '#f2b23a' : '#c9761a'
-  const dim = dark ? '#6c8a92' : '#5c6a72'
-  const bg = dark ? '#0a0e12' : '#f3f0e8'
+  const palette = dark
+    ? { line: '#7f9aa3', index: '#f2b23a', text: '#ece7db', grid: 'rgba(236,231,219,0.05)' }
+    : { line: '#4d5a63', index: '#c9761a', text: '#0d1117', grid: 'rgba(13,17,23,0.06)' }
 
   return (
     <section id="top" className="relative min-h-[100svh] pt-16">
@@ -59,17 +59,15 @@ export function Hero() {
           </m.div>
         </div>
 
-        {/* right: globe plate — fixed aspect so nothing below shifts */}
+        {/* right: terrain plate — fixed aspect so nothing below shifts */}
         <m.div className="md:col-span-5 relative" initial={anim ? { opacity: 0, scale: 0.96 } : false} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.1, ease, delay: 0.3 }}>
           <div className="relative aspect-square w-full max-w-[560px] md:ml-auto rounded-3xl border hairline bg-ink-2/60 overflow-hidden">
             <div className="absolute inset-0">
-              <Suspense fallback={null}>
-                <Globe paused={!motion} accent={accent} dim={dim} bg={bg} />
-              </Suspense>
+              <Terrain paused={!motion} palette={palette} />
             </div>
             <div className="pointer-events-none absolute inset-0 p-4 font-mono text-[0.62rem] tracking-[0.16em] uppercase text-mute">
               <div className="flex justify-between">
-                <span>Fig. 001 / Orbital plot</span>
+                <span>Fig. 001 / Isoline drift</span>
                 <span className="text-amber">● Live</span>
               </div>
               <div className="absolute bottom-4 left-4 right-4 flex justify-between">
@@ -78,7 +76,7 @@ export function Hero() {
               </div>
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-bone-2">+</span>
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-bone-2">+</span>
-              <span className="absolute bottom-10 left-1/2 -translate-x-1/2">Move to steer · {motion ? 'rotating' : 'paused'}</span>
+              <span className="absolute bottom-10 left-1/2 -translate-x-1/2">Move to raise terrain · {motion ? 'drifting' : 'paused'}</span>
             </div>
           </div>
         </m.div>

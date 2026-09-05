@@ -1,0 +1,15 @@
+# Isoline Drift
+
+*An algorithmic philosophy for the hero of andrew-an-site.*
+
+**Isoline Drift** treats the picture plane as a survey sheet of terrain that has not finished forming. Nothing is drawn directly. A scalar field is sampled on a lattice, and the only marks permitted are the places where that field crosses a level: contour lines, the cartographer's oldest way of making an invisible quantity legible. The field itself is layered gradient noise folded through a domain warp, so ridges bend back on themselves and basins nest inside basins. Every parameter in that fold was tuned by hand across many iterations until the map stopped looking like noise and started looking like ground.
+
+The movement is slow, because terrain is slow. The third noise axis is time, advanced at a rate chosen so that a viewer who glances away and back sees a different coast but never catches the change happening. This is the difference between a screensaver and a landscape: the landscape is always mid-sentence. The algorithm is meticulously crafted so that motion is continuous at every scale, from the largest ridge to the smallest closed loop that blinks into existence as a hill breaches the next level.
+
+Hierarchy is borrowed from real topographic convention. Every seventh contour is an index contour, drawn heavier and in the sheet's single accent colour; the six between it are thin and fade with depth so that high ground reads brighter than low. Local maxima above a threshold receive a spot-height glyph and a number, the way a surveyor marks a summit. Seven is not arbitrary: it is the number of phases in the resolver of the strategy engine this site describes, a quiet quotation only its author will hear. The accent colour of the index lines is the same amber as the orbital ground tracks in that engine's debug view.
+
+The viewer is a force. The pointer raises the field under it with a Gaussian lift, and the lift eases toward the pointer rather than jumping, so the ground swells and relaxes like something with mass. Contours crowd together on the flank of the raised hill and open out on its crown, exactly as they would on a real map, because the same marching-squares extraction handles both the noise and the intrusion. No separate "interaction layer" exists; the hand simply becomes part of the terrain.
+
+Determinism is the craft's foundation. One seed fixes the permutation table; from it, the same time and pointer always yield the same frame. There is no `Math.random` anywhere in the pipeline. This is the standard the site's author holds his own engine to, and the art keeps it: replayable, testable, the product of painstaking optimisation rather than happy accident. The p5 viewer that accompanies this document exposes the seed and the tunables so that variants can be explored, but the site itself ships a single seed, chosen with care, and never changes its mind.
+
+**Conceptual seed**: strategy-game cartography. Seven-line index cadence, amber ground-track accent, survey grid at 64 px, spot heights in metres. A map of a place that is still deciding what shape to be.

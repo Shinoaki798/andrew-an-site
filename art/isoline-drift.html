@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isoline Drift — Generative Art Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lora:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root { --anthropic-dark:#141413; --anthropic-light:#faf9f5; --anthropic-mid-gray:#b0aea5; --anthropic-light-gray:#e8e6dc; --anthropic-orange:#d97757; --anthropic-blue:#6a9bcc; --anthropic-green:#788c5d; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Poppins',sans-serif; background:linear-gradient(135deg,var(--anthropic-light) 0%,#f5f3ee 100%); min-height:100vh; color:var(--anthropic-dark); }
+        .container { display:flex; min-height:100vh; padding:20px; gap:20px; }
+        .sidebar { width:320px; flex-shrink:0; background:rgba(255,255,255,.95); backdrop-filter:blur(10px); padding:24px; border-radius:12px; box-shadow:0 10px 30px rgba(20,20,19,.1); overflow-y:auto; overflow-x:hidden; }
+        .sidebar h1 { font-family:'Lora',serif; font-size:24px; font-weight:500; margin-bottom:8px; }
+        .sidebar .subtitle { color:var(--anthropic-mid-gray); font-size:14px; margin-bottom:32px; line-height:1.4; }
+        .control-section { margin-bottom:32px; }
+        .control-section h3 { font-size:16px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+        .control-section h3::before { content:'•'; color:var(--anthropic-orange); font-weight:bold; }
+        .seed-input { width:100%; background:var(--anthropic-light); padding:12px; border-radius:8px; font-family:'Courier New',monospace; font-size:14px; margin-bottom:12px; border:1px solid var(--anthropic-light-gray); text-align:center; }
+        .seed-input:focus { outline:none; border-color:var(--anthropic-orange); box-shadow:0 0 0 2px rgba(217,119,87,.1); background:#fff; }
+        .seed-controls { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+        .control-group { margin-bottom:20px; }
+        .control-group label { display:block; font-size:14px; font-weight:500; margin-bottom:8px; }
+        .slider-container { display:flex; align-items:center; gap:12px; }
+        .slider-container input[type=range] { flex:1; height:4px; background:var(--anthropic-light-gray); border-radius:2px; outline:none; -webkit-appearance:none; }
+        .slider-container input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--anthropic-orange); border-radius:50%; cursor:pointer; }
+        .slider-container input[type=range]::-moz-range-thumb { width:16px; height:16px; background:var(--anthropic-orange); border-radius:50%; border:none; cursor:pointer; }
+        .value-display { font-family:'Courier New',monospace; font-size:12px; color:var(--anthropic-mid-gray); min-width:60px; text-align:right; }
+        .color-group { margin-bottom:16px; }
+        .color-group label { display:block; font-size:12px; color:var(--anthropic-mid-gray); margin-bottom:4px; }
+        .color-picker-container { display:flex; align-items:center; gap:8px; }
+        .color-picker-container input[type=color] { width:32px; height:32px; border:none; border-radius:6px; cursor:pointer; background:none; padding:0; }
+        .color-value { font-family:'Courier New',monospace; font-size:12px; color:var(--anthropic-mid-gray); }
+        .button { background:var(--anthropic-orange); color:#fff; border:none; padding:10px 16px; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer; transition:all .2s ease; width:100%; }
+        .button:hover { background:#c86641; transform:translateY(-1px); }
+        .button.secondary { background:var(--anthropic-blue); } .button.secondary:hover { background:#5a8bb8; }
+        .button.tertiary { background:var(--anthropic-green); } .button.tertiary:hover { background:#6b7b52; }
+        .button-row { display:flex; gap:8px; } .button-row .button { flex:1; }
+        .canvas-area { flex:1; display:flex; align-items:center; justify-content:center; min-width:0; }
+        #canvas-container { width:100%; max-width:1000px; border-radius:12px; overflow:hidden; box-shadow:0 20px 40px rgba(20,20,19,.1); background:#0a0e12; }
+        #canvas-container canvas { display:block; width:100% !important; height:auto !important; }
+        .loading { display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--anthropic-mid-gray); padding:40px; }
+        @media (max-width:600px) { .container { flex-direction:column; } .sidebar { width:100%; } .canvas-area { padding:20px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>Isoline Drift</h1>
+            <div class="subtitle">A survey sheet of terrain that has not finished forming. Domain-warped noise, marching-squares contours, every seventh line an index. Move the mouse over the map to raise the ground.</div>
+
+            <div class="control-section">
+                <h3>Seed</h3>
+                <input type="number" id="seed-input" class="seed-input" value="2060" onchange="updateSeed()">
+                <div class="seed-controls">
+                    <button class="button secondary" onclick="previousSeed()">← Prev</button>
+                    <button class="button secondary" onclick="nextSeed()">Next →</button>
+                </div>
+                <button class="button tertiary regen-button" onclick="randomSeedAndUpdate()">↻ Random</button>
+            </div>
+
+            <div class="control-section">
+                <h3>Parameters</h3>
+                <div class="control-group"><label>Contour levels</label><div class="slider-container">
+                    <input type="range" id="levels" min="7" max="56" step="1" value="28" oninput="updateParam('levels', this.value)"><span class="value-display" id="levels-value">28</span></div></div>
+                <div class="control-group"><label>Index every</label><div class="slider-container">
+                    <input type="range" id="indexEvery" min="2" max="14" step="1" value="7" oninput="updateParam('indexEvery', this.value)"><span class="value-display" id="indexEvery-value">7</span></div></div>
+                <div class="control-group"><label>Terrain scale</label><div class="slider-container">
+                    <input type="range" id="scale" min="0.0015" max="0.01" step="0.0001" value="0.0042" oninput="updateParam('scale', this.value)"><span class="value-display" id="scale-value">0.0042</span></div></div>
+                <div class="control-group"><label>Domain warp</label><div class="slider-container">
+                    <input type="range" id="warp" min="0" max="2.5" step="0.05" value="0.9" oninput="updateParam('warp', this.value)"><span class="value-display" id="warp-value">0.9</span></div></div>
+                <div class="control-group"><label>Drift speed</label><div class="slider-container">
+                    <input type="range" id="drift" min="0" max="0.3" step="0.005" value="0.045" oninput="updateParam('drift', this.value)"><span class="value-display" id="drift-value">0.045</span></div></div>
+                <div class="control-group"><label>Grid cell (px)</label><div class="slider-container">
+                    <input type="range" id="cell" min="4" max="16" step="1" value="7" oninput="updateParam('cell', this.value)"><span class="value-display" id="cell-value">7</span></div></div>
+                <div class="control-group"><label>Pointer lift</label><div class="slider-container">
+                    <input type="range" id="lift" min="0" max="1.5" step="0.05" value="0.55" oninput="updateParam('lift', this.value)"><span class="value-display" id="lift-value">0.55</span></div></div>
+                <div class="control-group"><label>Lift radius (px)</label><div class="slider-container">
+                    <input type="range" id="liftRadius" min="30" max="300" step="5" value="110" oninput="updateParam('liftRadius', this.value)"><span class="value-display" id="liftRadius-value">110</span></div></div>
+            </div>
+
+            <div class="control-section">
+                <h3>Colors</h3>
+                <div class="color-group"><label>Background</label><div class="color-picker-container">
+                    <input type="color" id="bg" value="#0a0e12" onchange="updateColor('bg', this.value)"><span class="color-value" id="bg-value">#0a0e12</span></div></div>
+                <div class="color-group"><label>Contour</label><div class="color-picker-container">
+                    <input type="color" id="line" value="#7f9aa3" onchange="updateColor('line', this.value)"><span class="color-value" id="line-value">#7f9aa3</span></div></div>
+                <div class="color-group"><label>Index contour</label><div class="color-picker-container">
+                    <input type="color" id="index" value="#f2b23a" onchange="updateColor('index', this.value)"><span class="color-value" id="index-value">#f2b23a</span></div></div>
+                <div class="color-group"><label>Spot-height text</label><div class="color-picker-container">
+                    <input type="color" id="text" value="#ece7db" onchange="updateColor('text', this.value)"><span class="color-value" id="text-value">#ece7db</span></div></div>
+            </div>
+
+            <div class="control-section">
+                <h3>Actions</h3>
+                <div class="button-row">
+                    <button class="button" onclick="regenerate()">Regenerate</button>
+                    <button class="button" onclick="resetParameters()">Reset</button>
+                </div>
+                <div class="button-row" style="margin-top:8px">
+                    <button class="button secondary" onclick="downloadPNG()">Download PNG</button>
+                </div>
+            </div>
+        </div>
+        <div class="canvas-area">
+            <div id="canvas-container"><div class="loading">Surveying the terrain…</div></div>
+        </div>
+    </div>
+
+    <script>
+/* ═══ CORE ALGORITHM — identical to src/art/isoline.ts on the site (bundled by esbuild) ═══ */
+"use strict";
+var Isoline = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // src/art/isoline.ts
+  var isoline_exports = {};
+  __export(isoline_exports, {
+    DEFAULTS: () => DEFAULTS,
+    Field: () => Field,
+    Noise: () => Noise,
+    contours: () => contours,
+    peaks: () => peaks,
+    render: () => render
+  });
+  var DEFAULTS = {
+    seed: 2060,
+    cell: 7,
+    scale: 42e-4,
+    warp: 0.9,
+    levels: 28,
+    indexEvery: 7,
+    drift: 0.045,
+    lift: 0.55,
+    liftRadius: 110,
+    peaks: true
+  };
+  function mulberry32(a) {
+    return () => {
+      a |= 0;
+      a = a + 1831565813 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var GRAD = [
+    [1, 1, 0],
+    [-1, 1, 0],
+    [1, -1, 0],
+    [-1, -1, 0],
+    [1, 0, 1],
+    [-1, 0, 1],
+    [1, 0, -1],
+    [-1, 0, -1],
+    [0, 1, 1],
+    [0, -1, 1],
+    [0, 1, -1],
+    [0, -1, -1]
+  ];
+  var fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+  var lerp = (a, b, t) => a + (b - a) * t;
+  var Noise = class {
+    p = new Uint8Array(512);
+    constructor(seed) {
+      const rnd = mulberry32(seed);
+      const perm = Array.from({ length: 256 }, (_, i) => i);
+      for (let i = 255; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        [perm[i], perm[j]] = [perm[j], perm[i]];
+      }
+      for (let i = 0; i < 512; i++) this.p[i] = perm[i & 255];
+    }
+    g(h, x, y, z) {
+      const v = GRAD[h % 12];
+      return v[0] * x + v[1] * y + v[2] * z;
+    }
+    /** classic 3-D Perlin, returns roughly [-1, 1] */
+    at(x, y, z) {
+      const p = this.p;
+      const X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+      x -= Math.floor(x);
+      y -= Math.floor(y);
+      z -= Math.floor(z);
+      const u = fade(x), v = fade(y), w = fade(z);
+      const A = p[X] + Y, AA = p[A] + Z, AB = p[A + 1] + Z;
+      const B = p[X + 1] + Y, BA = p[B] + Z, BB = p[B + 1] + Z;
+      return lerp(
+        lerp(
+          lerp(this.g(p[AA], x, y, z), this.g(p[BA], x - 1, y, z), u),
+          lerp(this.g(p[AB], x, y - 1, z), this.g(p[BB], x - 1, y - 1, z), u),
+          v
+        ),
+        lerp(
+          lerp(this.g(p[AA + 1], x, y, z - 1), this.g(p[BA + 1], x - 1, y, z - 1), u),
+          lerp(this.g(p[AB + 1], x, y - 1, z - 1), this.g(p[BB + 1], x - 1, y - 1, z - 1), u),
+          v
+        ),
+        w
+      );
+    }
+    fbm(x, y, z, oct = 3) {
+      let a = 0.5, f = 1, s = 0, n = 0;
+      for (let i = 0; i < oct; i++) {
+        s += a * this.at(x * f, y * f, z);
+        n += a;
+        a *= 0.5;
+        f *= 2.1;
+      }
+      return s / n;
+    }
+  };
+  var Field = class {
+    constructor(params) {
+      this.params = params;
+      this.noise = new Noise(params.seed);
+    }
+    params;
+    noise;
+    cols = 0;
+    rows = 0;
+    h = new Float32Array(0);
+    resize(w, hgt) {
+      this.cols = Math.ceil(w / this.params.cell) + 1;
+      this.rows = Math.ceil(hgt / this.params.cell) + 1;
+      this.h = new Float32Array(this.cols * this.rows);
+    }
+    /** pointer in px or null; t in seconds */
+    sample(t, pointer) {
+      const { cell, scale, warp, lift, liftRadius, drift } = this.params;
+      const n = this.noise;
+      const z = t * drift;
+      const r2 = liftRadius * liftRadius;
+      for (let j = 0; j < this.rows; j++) {
+        for (let i = 0; i < this.cols; i++) {
+          const px = i * cell, py = j * cell;
+          const x = px * scale, y = py * scale;
+          const qx = n.fbm(x + 1.7, y + 9.2, z, 2);
+          const qy = n.fbm(x + 8.3, y + 2.8, z, 2);
+          let v = n.fbm(x + warp * qx, y + warp * qy, z * 0.7, 3);
+          if (pointer) {
+            const dx = px - pointer.x, dy = py - pointer.y;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < r2 * 4) v += lift * Math.exp(-d2 / r2);
+          }
+          this.h[j * this.cols + i] = v;
+        }
+      }
+    }
+  };
+  function contours(f, level, out) {
+    const { cols, rows, h } = f;
+    const c = f.params.cell;
+    const ix = (a, b) => (level - a) / (b - a);
+    for (let j = 0; j < rows - 1; j++) {
+      for (let i = 0; i < cols - 1; i++) {
+        const a = h[j * cols + i], b = h[j * cols + i + 1];
+        const d = h[(j + 1) * cols + i], cc = h[(j + 1) * cols + i + 1];
+        const idx = (a > level ? 8 : 0) | (b > level ? 4 : 0) | (cc > level ? 2 : 0) | (d > level ? 1 : 0);
+        if (idx === 0 || idx === 15) continue;
+        const x0 = i * c, y0 = j * c;
+        const T = () => [x0 + ix(a, b) * c, y0];
+        const R = () => [x0 + c, y0 + ix(b, cc) * c];
+        const Bt = () => [x0 + ix(d, cc) * c, y0 + c];
+        const L = () => [x0, y0 + ix(a, d) * c];
+        const push = (p, q) => out.push([p[0], p[1], q[0], q[1]]);
+        switch (idx) {
+          case 1:
+          case 14:
+            push(L(), Bt());
+            break;
+          case 2:
+          case 13:
+            push(Bt(), R());
+            break;
+          case 3:
+          case 12:
+            push(L(), R());
+            break;
+          case 4:
+          case 11:
+            push(T(), R());
+            break;
+          case 5: {
+            const m = (a + b + cc + d) / 4 > level;
+            if (m) {
+              push(T(), R());
+              push(L(), Bt());
+            } else {
+              push(T(), L());
+              push(R(), Bt());
+            }
+            break;
+          }
+          case 6:
+          case 9:
+            push(T(), Bt());
+            break;
+          case 7:
+          case 8:
+            push(T(), L());
+            break;
+          case 10: {
+            const m = (a + b + cc + d) / 4 > level;
+            if (m) {
+              push(T(), L());
+              push(R(), Bt());
+            } else {
+              push(T(), R());
+              push(L(), Bt());
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+  function peaks(f, minH) {
+    const { cols, rows, h } = f;
+    const c = f.params.cell;
+    const out = [];
+    for (let j = 2; j < rows - 2; j++) {
+      for (let i = 2; i < cols - 2; i++) {
+        const v = h[j * cols + i];
+        if (v < minH) continue;
+        let top = true;
+        for (let dj = -2; dj <= 2 && top; dj++)
+          for (let di = -2; di <= 2; di++) {
+            if (!di && !dj) continue;
+            if (h[(j + dj) * cols + i + di] >= v) {
+              top = false;
+              break;
+            }
+          }
+        if (top) out.push({ x: i * c, y: j * c, v });
+      }
+    }
+    return out;
+  }
+  function render(ctx, f, w, hgt, t, pointer, pal) {
+    const P = f.params;
+    f.sample(t, pointer);
+    ctx.clearRect(0, 0, w, hgt);
+    ctx.strokeStyle = pal.grid;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 64) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, hgt);
+    }
+    for (let y = 0; y <= hgt; y += 64) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(w, y + 0.5);
+    }
+    ctx.stroke();
+    const segs = [];
+    const lo = -0.75, hi = 0.95;
+    for (let k = 0; k < P.levels; k++) {
+      const level = lo + (hi - lo) * k / (P.levels - 1);
+      const isIndex = k % P.indexEvery === 0;
+      segs.length = 0;
+      contours(f, level, segs);
+      if (!segs.length) continue;
+      ctx.beginPath();
+      for (const s of segs) {
+        ctx.moveTo(s[0], s[1]);
+        ctx.lineTo(s[2], s[3]);
+      }
+      if (isIndex) {
+        ctx.strokeStyle = pal.index;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.95;
+      } else {
+        ctx.strokeStyle = pal.line;
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.28 + 0.5 * (k / P.levels);
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    if (P.peaks) {
+      ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.textBaseline = "middle";
+      for (const p of peaks(f, 0.42)) {
+        const a = Math.min(1, (p.v - 0.42) / 0.25);
+        ctx.globalAlpha = a;
+        ctx.fillStyle = pal.index;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - 4);
+        ctx.lineTo(p.x + 4, p.y + 3);
+        ctx.lineTo(p.x - 4, p.y + 3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = pal.text;
+        ctx.fillText(String(Math.round(1200 + p.v * 900)), p.x + 8, p.y);
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+  return __toCommonJS(isoline_exports);
+})();
+
+/* ═══ PARAMETERS ═══ */
+let params = { ...Isoline.DEFAULTS, seed: 2060, colors: { bg: '#0a0e12', line: '#7f9aa3', index: '#f2b23a', text: '#ece7db' } };
+let defaultParams = JSON.parse(JSON.stringify(params));
+
+/* ═══ P5 SKETCH — p5 owns the canvas and the clock; the core owns the math ═══ */
+const W = 1200, H = 1200;
+let field, t = 0, cnv;
+
+function setup() {
+    cnv = createCanvas(W, H);
+    cnv.parent('canvas-container');
+    pixelDensity(1);
+    document.querySelector('.loading').style.display = 'none';
+    initializeSystem();
+}
+
+function initializeSystem() {
+    field = new Isoline.Field({ ...params });
+    field.resize(W, H);
+    t = 0;
+}
+
+function draw() {
+    t += deltaTime / 1000;
+    const ctx = drawingContext;
+    background(params.colors.bg);
+    const inside = mouseX >= 0 && mouseX <= W && mouseY >= 0 && mouseY <= H;
+    const ptr = inside ? { x: mouseX, y: mouseY } : null;
+    const c = params.colors;
+    const pal = { line: c.line, index: c.index, text: c.text, grid: hexA(c.text, 0.05) };
+    // core clears the canvas; we re-lay the background beneath by compositing
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    Isoline.render(ctx, field, W, H, t, ptr, pal);
+    ctx.restore();
+    // render() clears to transparent, so paint the background behind it
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+}
+
+function hexA(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+/* ═══ UI HANDLERS ═══ */
+function updateParam(name, value) {
+    params[name] = parseFloat(value);
+    document.getElementById(name + '-value').textContent = value;
+    // structural params need a new field; the rest apply live
+    if (name === 'cell' || name === 'seed') initializeSystem();
+    else field.params = { ...params };
+}
+function updateColor(id, value) {
+    params.colors[id] = value;
+    document.getElementById(id + '-value').textContent = value;
+}
+function regenerate() { initializeSystem(); }
+function downloadPNG() { saveCanvas(cnv, 'isoline-drift-' + params.seed, 'png'); }
+
+/* ═══ SEED CONTROLS ═══ */
+function updateSeedDisplay() { document.getElementById('seed-input').value = params.seed; }
+function updateSeed() {
+    const v = parseInt(document.getElementById('seed-input').value);
+    if (v && v > 0) { params.seed = v; initializeSystem(); } else updateSeedDisplay();
+}
+function previousSeed() { params.seed = Math.max(1, params.seed - 1); updateSeedDisplay(); initializeSystem(); }
+function nextSeed() { params.seed = params.seed + 1; updateSeedDisplay(); initializeSystem(); }
+function randomSeedAndUpdate() { params.seed = Math.floor(Math.random() * 999999) + 1; updateSeedDisplay(); initializeSystem(); }
+function resetParameters() {
+    params = JSON.parse(JSON.stringify(defaultParams));
+    for (const k of ['levels','indexEvery','scale','warp','drift','cell','lift','liftRadius']) {
+        document.getElementById(k).value = params[k];
+        document.getElementById(k + '-value').textContent = params[k];
+    }
+    for (const k of ['bg','line','index','text']) {
+        document.getElementById(k).value = params.colors[k];
+        document.getElementById(k + '-value').textContent = params.colors[k];
+    }
+    updateSeedDisplay();
+    initializeSystem();
+}
+window.addEventListener('load', updateSeedDisplay);
+    </script>
+</body>
+</html>
